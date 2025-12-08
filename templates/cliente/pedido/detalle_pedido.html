@@ -1,0 +1,209 @@
+{% extends 'cliente/base_cliente.html' %}
+
+{% block title %}Detalle del Pedido - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <!-- Encabezado -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h1 style="color: #4a5568; margin-bottom: 5px;">Pedido #{{ pedido.id_pedido }}</h1>
+            <p style="color: #718096;">
+                Fecha: {{ pedido.fecha_creacion|date:"d/m/Y H:i" }}
+            </p>
+        </div>
+        
+        <div>
+            {% if pedido.estado == 'PENDIENTE' %}
+            <span class="badge badge-pendiente" style="padding: 8px 15px; font-size: 0.9rem;">Pendiente</span>
+            {% elif pedido.estado == 'PAGADO' %}
+            <span class="badge badge-pagado" style="padding: 8px 15px; font-size: 0.9rem;">Pagado</span>
+            {% elif pedido.estado == 'ENVIADO' %}
+            <span class="badge badge-enviado" style="padding: 8px 15px; font-size: 0.9rem;">Enviado</span>
+            {% elif pedido.estado == 'ENTREGADO' %}
+            <span class="badge badge-entregado" style="padding: 8px 15px; font-size: 0.9rem;">Entregado</span>
+            {% elif pedido.estado == 'CANCELADO' %}
+            <span class="badge badge-cancelado" style="padding: 8px 15px; font-size: 0.9rem;">Cancelado</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Productos del pedido -->
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h2 style="color: #4a5568; margin-bottom: 20px;">Productos</h2>
+        
+        {% if pedido.detalles.all %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario (sin IVA)</th>
+                        <th>Subtotal (sin IVA)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in pedido.detalles.all %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="width: 50px; height: 50px; background: #e2e8f0; border-radius: 8px;"></div>
+                                <div>
+                                    {% if detalle.alimento %}
+                                    <strong style="color: #2d3748;">{{ detalle.alimento.nombre }}</strong><br>
+                                    <span style="color: #718096; font-size: 0.9rem;">Alimento</span>
+                                    {% elif detalle.accesorio %}
+                                    <strong style="color: #2d3748;">{{ detalle.accesorio.nombre }}</strong><br>
+                                    <span style="color: #718096; font-size: 0.9rem;">Accesorio</span>
+                                    {% elif detalle.mascota %}
+                                    <strong style="color: #2d3748;">{{ detalle.mascota.nombre }}</strong><br>
+                                    <span style="color: #718096; font-size: 0.9rem;">Mascota</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ detalle.cantidad }}</td>
+                        <td>${{ detalle.precio_unitario }}</td>
+                        <td>${{ detalle.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #718096; text-align: center; padding: 40px;">
+            No hay productos en este pedido.
+        </p>
+        {% endif %}
+    </div>
+    
+    <!-- Información del pago -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <!-- Información de envío -->
+        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+            <h2 style="color: #4a5568; margin-bottom: 20px;">Información de Envío</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #718096; font-size: 0.9rem; margin-bottom: 5px;">Cliente</h3>
+                <p style="color: #2d3748;">
+                    {{ pedido.id_usuario.nombre }} {{ pedido.id_usuario.apepaterno }} {{ pedido.id_usuario.apematerno }}
+                </p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #718096; font-size: 0.9rem; margin-bottom: 5px;">Dirección</h3>
+                <p style="color: #2d3748;">
+                    {{ pedido.id_usuario.domicilio }}<br>
+                    {{ pedido.id_usuario.ciudad }}, {{ pedido.id_usuario.estado }}<br>
+                    C.P. {{ pedido.id_usuario.codigo_postal }}
+                </p>
+            </div>
+            
+            <div>
+                <h3 style="color: #718096; font-size: 0.9rem; margin-bottom: 5px;">Contacto</h3>
+                <p style="color: #2d3748;">
+                    {{ pedido.id_usuario.correo }}<br>
+                    {{ pedido.id_usuario.telefono }}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Resumen de pago -->
+        <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+            <h2 style="color: #4a5568; margin-bottom: 20px;">Resumen de Pago</h2>
+            
+            {% with venta=pedido.venta_set.first %}
+            {% if venta %}
+            <div style="margin-bottom: 25px;">
+                <h3 style="color: #718096; font-size: 0.9rem; margin-bottom: 5px;">Método de Pago</h3>
+                <p style="color: #2d3748; font-weight: bold; font-size: 1.1rem;">
+                    {{ venta.metodo_pago }}
+                </p>
+                <p style="color: #718096; font-size: 0.9rem;">
+                    Fecha de pago: {{ venta.fecha_venta|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+            {% endif %}
+            {% endwith %}
+            
+            <!-- Desglose fiscal -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #4a5568; margin-bottom: 15px;">Desglose Fiscal</h3>
+                
+                <!-- CORREGIDO: Usar filtro de Django para calcular sumas -->
+                {% with subtotal=pedido.detalles.all|sum_subtotal iva=pedido.detalles.all|sum_subtotal|multiply:0.16 %}
+                <div style="margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #718096;">Subtotal (sin IVA):</span>
+                        <span style="color: #2d3748;">${{ subtotal|floatformat:2 }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #718096;">IVA (16%):</span>
+                        <span style="color: #2d3748;">${{ iva|floatformat:2 }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; padding-top: 15px; border-top: 2px solid #e2e8f0;">
+                        <span style="color: #2d3748; font-weight: bold; font-size: 1.1rem;">Total Pagado:</span>
+                        <span style="color: #2d3748; font-weight: bold; font-size: 1.1rem;">${{ pedido.total }}</span>
+                    </div>
+                </div>
+                {% endwith %}
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                    <p style="color: #718096; font-size: 0.9rem;">
+                        <strong>Importante:</strong> El total incluye IVA (16%).
+                        Factura electrónica disponible.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Información de facturación -->
+            <div style="margin-top: 25px;">
+                <h3 style="color: #718096; font-size: 0.9rem; margin-bottom: 10px;">Información de Facturación</h3>
+                <p style="color: #2d3748;">
+                    RFC: {{ pedido.id_usuario.rfc }}<br>
+                    Factura enviada a: {{ pedido.id_usuario.correo }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Acciones -->
+    <div style="margin-top: 40px; text-align: center;">
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <!-- CORREGIDO: Agregar namespace 'cliente:' -->
+            <a href="{% url 'cliente:mis_pedidos' %}" class="btn" style="background: #e2e8f0; color: #4a5568; padding: 12px 30px;">
+                Volver a Mis Pedidos
+            </a>
+            <!-- CORREGIDO: Agregar namespace 'cliente:' -->
+            <a href="{% url 'cliente:index_cliente' %}" class="btn btn-primary" style="padding: 12px 30px;">
+                Seguir Comprando
+            </a>
+            
+            {% if pedido.venta_set.first %}
+            <button onclick="window.print()" class="btn btn-secondary" style="padding: 12px 30px;">
+                Imprimir Factura
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- CORRECCIÓN: Quitar el extra_js del bloque content -->
+<script>
+// Función para imprimir
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar clase de impresión
+    const printButton = document.querySelector('button[onclick="window.print()"]');
+    if (printButton) {
+        printButton.addEventListener('click', function() {
+            setTimeout(function() {
+                alert('Si la impresión no se inicia, usa Ctrl+P');
+            }, 100);
+        });
+    }
+});
+</script>
+{% endblock %}

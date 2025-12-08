@@ -1,0 +1,164 @@
+{% extends 'cliente/base_cliente.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ producto.nombre }} - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <!-- Navegación -->
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'cliente:index_cliente' %}" style="color: #667eea; text-decoration: none;">Inicio</a> 
+        > 
+        <a href="{% url 'cliente:lista_categoria' categoria_id=producto.id_categoria.id_categoria %}" style="color: #667eea; text-decoration: none;">
+            {{ producto.id_categoria.nombre }}
+        </a>
+        > 
+        <span style="color: #718096;">{{ producto.nombre }}</span>
+    </div>
+    
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+            <!-- Imagen -->
+            <div>
+                <img src="{% if producto.imagen %}{{ producto.imagen.url }}{% else %}https://via.placeholder.com/400x400/e2e8f0/4a5568?text=Sin+imagen{% endif %}" 
+                     alt="{{ producto.nombre }}" 
+                     style="width: 100%; border-radius: 12px;">
+            </div>
+            
+            <!-- Información -->
+            <div>
+                <h1 style="font-size: 1.8rem; color: #2d3748; margin-bottom: 15px;">{{ producto.nombre }}</h1>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <div class="product-price" style="font-size: 2rem; margin-bottom: 10px;">
+                        ${{ producto.precio }} <span style="font-size: 1rem;">(sin IVA)</span>
+                    </div>
+                    
+                    <div style="color: #718096; margin-bottom: 10px;">
+                        <strong>Tipo:</strong> {{ producto.id_tipo.nombre }}
+                    </div>
+                    <div style="color: #718096;">
+                        <strong>Categoría:</strong> {{ producto.id_categoria.nombre }}
+                    </div>
+                </div>
+                
+                <!-- Detalles específicos -->
+                {% if tipo_producto == 'alimento' %}
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #4a5568; margin-bottom: 10px;">Especificaciones</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        {% if producto.gramos %}
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #718096; display: block; margin-bottom: 5px;">Peso</strong>
+                            <span style="color: #2d3748; font-weight: bold;">{{ producto.gramos }}g</span>
+                        </div>
+                        {% endif %}
+                        {% if producto.piezas %}
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #718096; display: block; margin-bottom: 5px;">Piezas</strong>
+                            <span style="color: #2d3748; font-weight: bold;">{{ producto.piezas }} pz</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% elif tipo_producto == 'accesorio' %}
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #4a5568; margin-bottom: 10px;">Función</h3>
+                    <p style="color: #4a5568; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        {{ producto.funcion }}
+                    </p>
+                </div>
+                
+                {% elif tipo_producto == 'mascota' %}
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #4a5568; margin-bottom: 10px;">Características</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #718096; display: block; margin-bottom: 5px;">Raza</strong>
+                            <span style="color: #2d3748; font-weight: bold;">{{ producto.raza }}</span>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #718096; display: block; margin-bottom: 5px;">Edad</strong>
+                            <span style="color: #2d3748; font-weight: bold;">{{ producto.edad }} meses</span>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <strong style="color: #718096; display: block; margin-bottom: 5px;">Peso</strong>
+                            <span style="color: #2d3748; font-weight: bold;">{{ producto.peso }} kg</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Formulario de compra -->
+                <form method="post" action="{% url 'cliente:agregar_al_carrito' %}" style="margin-top: 30px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="producto_id" value="
+                        {% if tipo_producto == 'alimento' %}{{ producto.id_alimentos }}
+                        {% elif tipo_producto == 'accesorio' %}{{ producto.id_accesorio }}
+                        {% elif tipo_producto == 'mascota' %}{{ producto.id_mascotas }}
+                        {% endif %}
+                    ">
+                    <input type="hidden" name="tipo_producto" value="{{ tipo_producto }}">
+                    
+                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 8px; color: #4a5568;">Cantidad</label>
+                            <input type="number" name="cantidad" value="1" min="1" style="width: 100px; text-align: center;">
+                        </div>
+                        <div style="flex: 3;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+                                Agregar al Carrito
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Información de IVA -->
+                <div style="background: #f0fff4; border-left: 4px solid #48bb78; padding: 15px; border-radius: 8px;">
+                    {% with precio_con_iva=producto.precio|multiply:1.16 %}
+                    <p style="color: #22543d; margin: 0;">
+                        <strong>Precio con IVA incluido:</strong> 
+                        ${{ precio_con_iva|floatformat:2 }}
+                    </p>
+                    {% endwith %}
+                    <p style="color: #718096; font-size: 0.9rem; margin: 5px 0 0 0;">
+                        * El IVA (16%) se calculará al momento del pago
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Descripción detallada -->
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 30px;">
+            <h3 style="color: #4a5568; margin-bottom: 15px;">Descripción</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                {% if tipo_producto == 'alimento' %}
+                <p style="color: #4a5568; line-height: 1.6; white-space: pre-line;">{{ producto.contenido }}</p>
+                {% elif tipo_producto == 'accesorio' %}
+                <p style="color: #4a5568; line-height: 1.6; white-space: pre-line;">{{ producto.contenido }}</p>
+                {% elif tipo_producto == 'mascota' %}
+                <p style="color: #4a5568; line-height: 1.6; white-space: pre-line;">{{ producto.cuidados }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Asegurar que la cantidad sea válida
+    document.addEventListener('DOMContentLoaded', function() {
+        const cantidadInput = document.querySelector('input[name="cantidad"]');
+        
+        if (cantidadInput) {
+            cantidadInput.addEventListener('change', function() {
+                if (this.value < 1) {
+                    this.value = 1;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

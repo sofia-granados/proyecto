@@ -1,0 +1,73 @@
+{% extends 'administracion/base.html' %}
+
+{% block title %}Pedidos - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="card-header">Pedidos Realizados</h2>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Pedido</th>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr>
+                    <td>{{ pedido.id_pedido }}</td>
+                    <td>{{ pedido.id_usuario.nombre }} {{ pedido.id_usuario.apepaterno }}</td>
+                    <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                    <td>${{ pedido.total }}</td>
+                    <td>
+                        <span style="
+                            padding: 5px 10px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            font-weight: 600;
+                            {% if pedido.estado == 'ENTREGADO' %}
+                                background: #c8e6c9;
+                                color: #2e7d32;
+                            {% elif pedido.estado == 'ENVIADO' %}
+                                background: #bbdefb;
+                                color: #1565c0;
+                            {% elif pedido.estado == 'PAGADO' %}
+                                background: #fff9c4;
+                                color: #f57f17;
+                            {% elif pedido.estado == 'PENDIENTE' %}
+                                background: #ffcdd2;
+                                color: #c62828;
+                            {% else %}
+                                background: #e0e0e0;
+                                color: #616161;
+                            {% endif %}
+                        ">
+                            {{ pedido.estado }}
+                        </span>
+                    </td>
+                   <td class="action-buttons">
+    <a href="{% url 'administracion:detalle_pedido' pedido.id_pedido %}" class="btn btn-secondary">Ver Detalles</a>
+    <a href="{% url 'administracion:cambiar_estado_pedido' pedido.id_pedido %}" class="btn btn-primary">Cambiar Estado</a>
+    <a href="{% url 'administracion:eliminar_pedido' pedido.id_pedido %}" class="btn btn-danger">Eliminar</a>  <!-- NUEVO -->
+</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px;">
+                        No hay pedidos registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends 'administracion/base.html' %}
+
+{% block title %}Detalle Venta - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="card-header">Detalle de Venta #{{ venta.id_venta }}</h2>
+        <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+        <a href="{% url 'administracion:ver_ventas' %}" class="btn btn-secondary">Volver a Ventas</a>
+    </div>
+
+    <div class="table-container">
+        <!-- INFORMACIÓN PRINCIPAL DE LA VENTA -->
+        <div style="margin-bottom: 30px; padding: 25px; background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%); border-radius: 12px; border: 1px solid #b3e0ff;">
+            <h3 style="color: #1971c2; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #4dabf7;">
+                💰 Información de la Venta
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <strong style="color: #666; display: block; margin-bottom: 5px;">ID Venta:</strong>
+                    <span style="font-size: 1.2rem; font-weight: bold; color: #1971c2;">#{{ venta.id_venta }}</span>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <strong style="color: #666; display: block; margin-bottom: 5px;">Cliente:</strong>
+                    <span style="font-size: 1.1rem;">{{ venta.id_usuario.nombre }} {{ venta.id_usuario.apepaterno }}</span>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <strong style="color: #666; display: block; margin-bottom: 5px;">Pedido Asociado:</strong>
+                    <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+                    <a href="{% url 'administracion:detalle_pedido' venta.id_pedido.id_pedido %}" style="color: #ff65a3; text-decoration: none; font-weight: bold;">
+                        #{{ venta.id_pedido.id_pedido }}
+                    </a>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <strong style="color: #666; display: block; margin-bottom: 5px;">Fecha de Venta:</strong>
+                    <span style="font-size: 1.1rem;">{{ venta.fecha_venta|date:"d/m/Y H:i" }}</span>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #ffe6f2 0%, #ffccf9 100%); padding: 20px; border-radius: 8px; grid-column: span 2;">
+                    <strong style="color: #666; display: block; margin-bottom: 10px;">Importe Total:</strong>
+                    <span style="font-size: 2rem; font-weight: bold; color: #ff65a3;">
+                        ${{ venta.importe_total }}
+                    </span>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <strong style="color: #666; display: block; margin-bottom: 5px;">Método de Pago:</strong>
+                    <span style="
+                        padding: 6px 12px;
+                        border-radius: 20px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        {% if venta.metodo_pago == 'EFECTIVO' %}
+                            background: #d4edda;
+                            color: #155724;
+                            border: 1px solid #c3e6cb;
+                        {% elif venta.metodo_pago == 'TARJETA' %}
+                            background: #d1ecf1;
+                            color: #0c5460;
+                            border: 1px solid #bee5eb;
+                        {% elif venta.metodo_pago == 'TRANSFERENCIA' %}
+                            background: #d6d8d9;
+                            color: #383d41;
+                            border: 1px solid #c6c8ca;
+                        {% else %}
+                            background: #f8f9fa;
+                            color: #212529;
+                            border: 1px solid #e9ecef;
+                        {% endif %} ">
+                        {{ venta.get_metodo_pago_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFORMACIÓN DEL PEDIDO ASOCIADO -->
+        <div style="margin-bottom: 30px; padding: 25px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; border: 1px solid #dee2e6;">
+            <h3 style="color: #495057; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #adb5bd;">
+                📋 Información del Pedido Asociado
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div>
+                    <strong style="color: #666;">ID Pedido:</strong><br>
+                    <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+                    <a href="{% url 'administracion:detalle_pedido' venta.id_pedido.id_pedido %}" style="color: #1971c2; text-decoration: none; font-weight: bold;">
+                        #{{ venta.id_pedido.id_pedido }}
+                    </a>
+                </div>
+                <div>
+                    <strong style="color: #666;">Fecha del Pedido:</strong><br>
+                    {{ venta.id_pedido.fecha_creacion|date:"d/m/Y H:i" }}
+                </div>
+                <div>
+                    <strong style="color: #666;">Estado del Pedido:</strong><br>
+                    <span style="
+                        padding: 6px 12px;
+                        border-radius: 20px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        display: inline-block;
+                        margin-top: 5px;
+                        {% if venta.id_pedido.estado == 'ENTREGADO' %}
+                            background: #c8e6c9;
+                            color: #2e7d32;
+                        {% elif venta.id_pedido.estado == 'ENVIADO' %}
+                            background: #bbdefb;
+                            color: #1565c0;
+                        {% elif venta.id_pedido.estado == 'PAGADO' %}
+                            background: #fff9c4;
+                            color: #f57f17;
+                        {% elif venta.id_pedido.estado == 'PENDIENTE' %}
+                            background: #ffcdd2;
+                            color: #c62828;
+                        {% elif venta.id_pedido.estado == 'CANCELADO' %}
+                            background: #e0e0e0;
+                            color: #616161;
+                        {% else %}
+                            background: #f5f5f5;
+                            color: #424242;
+                        {% endif %}
+                    ">
+                        {{ venta.id_pedido.estado }}
+                    </span>
+                </div>
+                <div>
+                    <strong style="color: #666;">Total del Pedido:</strong><br>
+                    <span style="font-size: 1.1rem; font-weight: bold; color: #ff65a3;">
+                        ${{ venta.id_pedido.total }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- BOTÓN PARA VER DETALLES DEL PEDIDO -->
+            <div style="text-align: center; margin-top: 20px;">
+                <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+                <a href="{% url 'administracion:detalle_pedido' venta.id_pedido.id_pedido %}" class="btn btn-primary" style="padding: 10px 25px;">
+                    📄 Ver Detalles Completos del Pedido
+                </a>
+            </div>
+        </div>
+
+        <!-- INFORMACIÓN DEL CLIENTE -->
+        <div style="margin-bottom: 30px; padding: 25px; background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 12px; border: 1px solid #ffd54f;">
+            <h3 style="color: #856404; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #ffc107;">
+                👤 Información del Cliente
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div>
+                    <strong style="color: #856404;">Nombre completo:</strong><br>
+                    {{ venta.id_usuario.nombre }} {{ venta.id_usuario.apepaterno }} {{ venta.id_usuario.apematerno }}
+                </div>
+                <div>
+                    <strong style="color: #856404;">Correo electrónico:</strong><br>
+                    {{ venta.id_usuario.correo }}
+                </div>
+                <div>
+                    <strong style="color: #856404;">Teléfono:</strong><br>
+                    {{ venta.id_usuario.telefono }}
+                </div>
+                <div>
+                    <strong style="color: #856404;">RFC:</strong><br>
+                    {{ venta.id_usuario.rfc }}
+                </div>
+                <div style="grid-column: span 2;">
+                    <strong style="color: #856404;">Domicilio:</strong><br>
+                    {{ venta.id_usuario.domicilio }}
+                </div>
+                <div>
+                    <strong style="color: #856404;">Ciudad:</strong><br>
+                    {{ venta.id_usuario.ciudad }}
+                </div>
+                <div>
+                    <strong style="color: #856404;">Estado:</strong><br>
+                    {{ venta.id_usuario.estado }}
+                </div>
+                <div>
+                    <strong style="color: #856404;">Código Postal:</strong><br>
+                    {{ venta.id_usuario.codigo_postal }}
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div style="text-align: center; margin-top: 40px; padding: 30px; background: #f8f9fa; border-radius: 12px;">
+            <h3 style="color: #495057; margin-bottom: 25px;">Acciones Disponibles</h3>
+            
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;">
+                <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+                <a href="{% url 'administracion:eliminar_venta' venta.id_venta %}" class="btn btn-danger" style="padding: 12px 30px; min-width: 180px;">
+                    🗑️ Eliminar Venta
+                </a>
+                
+                <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+                <a href="{% url 'administracion:detalle_pedido' venta.id_pedido.id_pedido %}" class="btn btn-primary" style="padding: 12px 30px; min-width: 180px;">
+                    📋 Ver Pedido
+                </a>
+                
+                <button onclick="window.print()" class="btn btn-secondary" style="padding: 12px 30px; min-width: 180px;">
+                    🖨️ Imprimir Comprobante
+                </button>
+                
+                <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+                <a href="{% url 'administracion:ver_ventas' %}" class="btn btn-outline-secondary" style="padding: 12px 30px; min-width: 180px;">
+                    ↩️ Volver a Ventas
+                </a>
+            </div>
+            
+            <!-- NOTA IMPORTANTE -->
+            <div style="margin-top: 30px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                    ⚠️ <strong>Nota:</strong> La eliminación de ventas solo debe realizarse en caso de registros erróneos. 
+                    Para devoluciones o cancelaciones, utilice el sistema de devoluciones correspondiente.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT PARA IMPRESIÓN MEJORADA -->
+<script>
+function imprimirComprobante() {
+    // Crear una ventana nueva para imprimir
+    const ventanaImpresion = window.open('', '_blank');
+    ventanaImpresion.document.write(`
+        <html>
+        <head>
+            <title>Comprobante Venta #{{ venta.id_venta }} - Chofys Pet's</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                .info { margin-bottom: 20px; }
+                .info h3 { color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+                .total { font-size: 1.5em; font-weight: bold; text-align: right; margin-top: 30px; }
+                .footer { margin-top: 50px; text-align: center; font-size: 0.8em; color: #666; }
+                @media print {
+                    .no-print { display: none; }
+                    body { font-size: 12pt; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Chofys Pet's</h1>
+                <h2>Comprobante de Venta #{{ venta.id_venta }}</h2>
+                <p>Fecha: {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+            </div>
+            
+            <div class="info">
+                <h3>Información del Cliente</h3>
+                <p><strong>Nombre:</strong> {{ venta.id_usuario.nombre }} {{ venta.id_usuario.apepaterno }}</p>
+                <p><strong>RFC:</strong> {{ venta.id_usuario.rfc }}</p>
+                <p><strong>Domicilio:</strong> {{ venta.id_usuario.domicilio }}</p>
+            </div>
+            
+            <div class="info">
+                <h3>Detalles de la Venta</h3>
+                <p><strong>Pedido:</strong> #{{ venta.id_pedido.id_pedido }}</p>
+                <p><strong>Método de Pago:</strong> {{ venta.get_metodo_pago_display }}</p>
+            </div>
+            
+            <div class="total">
+                <strong>TOTAL: ${{ venta.importe_total }}</strong>
+            </div>
+            
+            <div class="footer">
+                <p>Chofys Pet's - Sistema de Administración</p>
+                <p>Venta registrada el: {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+                <p>ID de transacción: VN-{{ venta.id_venta }}-{{ venta.fecha_venta|date:"Ymd" }}</p>
+            </div>
+            
+            <div class="no-print" style="margin-top: 30px; text-align: center;">
+                <button onclick="window.print()">Imprimir</button>
+                <button onclick="window.close()">Cerrar</button>
+            </div>
+        </body>
+        </html>
+    `);
+    ventanaImpresion.document.close();
+}
+</script>
+{% endblock %}

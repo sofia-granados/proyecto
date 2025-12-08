@@ -1,0 +1,72 @@
+{% extends 'administracion/base.html' %}
+
+{% block title %}Editar Mascota - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 style="color: #ff65a3; margin-bottom: 30px; text-align: center;">Editar Mascota: {{ mascota.nombre }}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label>Nombre de la Mascota:</label>
+                <input type="text" name="nombre" value="{{ mascota.nombre }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Precio ($):</label>
+                <input type="number" name="precio" value="{{ mascota.precio }}" step="0.01" required min="0">
+            </div>
+            
+            <div class="form-group">
+                <label>Tipo de Animal:</label>
+                <select name="id_tipo" required>
+                    {% for tipo in tipos %}
+                    <option value="{{ tipo.id_tipos }}" {% if tipo.id_tipos == mascota.id_tipo.id_tipos %}selected{% endif %}>
+                        {{ tipo.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Categoría:</label>
+                <select name="id_categoria" required>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id_categoria }}" {% if categoria.id_categoria == mascota.id_categoria.id_categoria %}selected{% endif %}>
+                        {{ categoria.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Raza:</label>
+                <input type="text" name="raza" value="{{ mascota.raza }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Edad (meses):</label>
+                <input type="number" name="edad" value="{{ mascota.edad }}" required min="0">
+            </div>
+            
+            <div class="form-group">
+                <label>Peso (kg):</label>
+                <input type="number" name="peso" value="{{ mascota.peso }}" step="0.01" required min="0">
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Cuidados Especiales:</label>
+                <textarea name="cuidados" rows="4" required>{{ mascota.cuidados }}</textarea>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 40px;">Actualizar</button>
+            <a href="{% url 'administracion:ver_mascotas' %}" class="btn btn-secondary" style="padding: 12px 40px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
