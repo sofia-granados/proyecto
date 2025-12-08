@@ -1,0 +1,67 @@
+{% extends 'administracion/base.html' %}
+
+{% block title %}Agregar Accesorio - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 style="color: #ff65a3; margin-bottom: 30px; text-align: center;">Agregar Nuevo Accesorio</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label>Nombre del Accesorio:</label>
+                <input type="text" name="nombre" required placeholder="Ej: Collar con Placa, Juguete de Peluche">
+            </div>
+            
+            <div class="form-group">
+                <label>Precio ($):</label>
+                <input type="number" name="precio" step="0.01" required placeholder="0.00" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label>Tipo de Animal:</label>
+                <select name="id_tipo" required>
+                    <option value="">Seleccione un tipo</option>
+                    {% for tipo in tipos %}
+                    <option value="{{ tipo.id_tipos }}">{{ tipo.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Categoría:</label>
+                <select name="id_categoria" required>
+                    <option value="">Seleccione una categoría</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Imagen del Producto:</label>
+                <input type="file" name="imagen" accept="image/*">
+                <small style="color: #666;">Formatos aceptados: JPG, PNG, GIF</small>
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Función:</label>
+                <textarea name="funcion" rows="3" required placeholder="Describa la función del accesorio..."></textarea>
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Contenido / Características:</label>
+                <textarea name="contenido" rows="4" required placeholder="Describa las características o lo que incluye el accesorio..."></textarea>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 40px;">Guardar Accesorio</button>
+            <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+            <a href="{% url 'administracion:ver_accesorios' %}" class="btn btn-secondary" style="padding: 12px 40px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

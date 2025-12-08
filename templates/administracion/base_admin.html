@@ -1,0 +1,37 @@
+<!-- app_mascotas/templates/administration/base_admin.html -->
+{% extends 'administracion/base.html' %}
+
+{% block title %}Panel de Administración{% endblock %}
+
+{% block extra_css %}
+<!-- CSS específico para administración -->
+<style>
+    .admin-panel {
+        background-color: #f8f9fa;
+        padding: 20px;
+    }
+    .admin-header {
+        background-color: #343a40;
+        color: white;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h2><i class="fas fa-cog"></i> Panel de Administración</h2>
+    <nav>
+        <a href="{% url 'administracion:ver_alimentos' %}">Alimentos</a> |
+        <a href="{% url 'lista_mascotas' %}">Mascotas</a> |
+        <!-- Agrega más enlaces aquí -->
+    </nav>
+</div>
+
+<div class="admin-panel">
+    {% block admin_content %}
+    <!-- El contenido específico de administración irá aquí -->
+    {% endblock %}
+</div>
+{% endblock %}

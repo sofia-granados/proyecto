@@ -1,0 +1,109 @@
+<!-- app_mascotas/templates/administracion/alimentos/ver_alimentos.html -->
+{% extends 'administracion/base_admin.html' %}
+
+{% block admin_content %}
+<h2>Lista de Alimentos</h2>
+
+<!-- Filtros -->
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h5>Filtrar por:</h5>
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="categoria" class="form-label">Categoría</label>
+                <select name="categoria" id="categoria" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todas las categorías</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id }}" 
+                            {% if categoria_seleccionada == categoria.id %}selected{% endif %}>
+                        {{ categoria.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select name="tipo" id="tipo" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todos los tipos</option>
+                    {% for tipo in tipos %}
+                    <option value="{{ tipo.id }}" 
+                            {% if tipo_seleccionado == tipo.id %}selected{% endif %}>
+                        {{ tipo.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4 d-flex align-items-end">
+                <a href="{% url 'administracion:ver_alimentos' %}" class="btn btn-secondary">
+                    Limpiar filtros
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Botón agregar -->
+<div class="mb-3">
+    <a href="{% url 'administracion:agregar_alimento' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Agregar Nuevo Alimento
+    </a>
+</div>
+
+<!-- Tabla de alimentos -->
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Tipo</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alimento in alimentos %}
+            <tr>
+                <td>{{ alimento.id }}</td>
+                <td>{{ alimento.nombre }}</td>
+                <td>{{ alimento.categoria.nombre }}</td>
+                <td>{{ alimento.tipo.nombre }}</td>
+                <td>${{ alimento.precio }}</td>
+                <td>{{ alimento.stock }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'administracion:editar_alimento' alimento.id %}" class="btn btn-warning">
+                            Editar
+                        </a>
+                        <a href="{% url 'administracion:eliminar_alimento' alimento.id %}" class="btn btn-danger">
+                            Eliminar
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">No hay alimentos registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Mostrar filtro activo -->
+{% if categoria_seleccionada or tipo_seleccionado %}
+<div class="alert alert-info" style="margin-top: 20px;">
+    <strong>Filtro activo:</strong>
+    {% if categoria_seleccionada %}
+        Categoría: {{ categorias.get.id=categoria_seleccionada.nombre }}
+    {% endif %}
+    {% if tipo_seleccionado %}
+        Tipo: {{ tipos.get.id=tipo_seleccionado.nombre }}
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
