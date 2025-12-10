@@ -1,0 +1,29 @@
+{% extends 'administracion/base_admin.html' %}
+
+{% block title %}Eliminar Accesorio - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 style="color: #ff5252; margin-bottom: 20px; text-align: center;">Confirmar Eliminación</h2>
+    
+    <div class="alert alert-danger" style="text-align: center; padding: 30px;">
+        <h3 style="margin-bottom: 20px;">¿Está seguro de eliminar este accesorio?</h3>
+        <p><strong>{{ accesorio.nombre }}</strong></p>
+        <p>Precio: ${{ accesorio.precio }}</p>
+        <p>Tipo: {{ accesorio.id_tipo.nombre }}</p>
+        <p>Función: {{ accesorio.funcion|truncatechars:100 }}</p>
+        <p style="margin-top: 20px; font-weight: bold; color: #721c24;">
+            Esta acción no se puede deshacer.
+        </p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+            <button type="submit" class="btn btn-danger" style="padding: 12px 40px;">Sí, Eliminar</button>
+            <!-- CORREGIDO: Agregar namespace 'administracion:' -->
+            <a href="{% url 'administracion:ver_accesorios' %}" class="btn btn-secondary" style="padding: 12px 40px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

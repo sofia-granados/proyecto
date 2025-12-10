@@ -1,0 +1,71 @@
+{% extends 'administracion/base_admin.html' %}
+{% block title %}Eliminar Pedido - Chofys Pet's{% endblock %}
+
+{% block admin_content %}
+<div class="form-container">
+    <h2 style="color: #ff5252; margin-bottom: 20px; text-align: center;">Confirmar Eliminación de Pedido</h2>
+    
+    <div class="alert alert-danger" style="text-align: center; padding: 30px;">
+        <h3 style="margin-bottom: 20px;">⚠️ ¿Está seguro de eliminar este pedido?</h3>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left;">
+            <p><strong>ID Pedido:</strong> #{{ pedido.id }}</p>
+            <p><strong>Cliente:</strong> {{ pedido.id_usuario.nombre }} {{ pedido.id_usuario.apepaterno }}</p>
+            <p><strong>Correo:</strong> {{ pedido.id_usuario.correo }}</p>
+            <p><strong>Fecha:</strong> {{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</p>
+            <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            <p><strong>Estado:</strong> 
+                <span style="
+                    padding: 5px 10px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    {% if pedido.estado == 'ENTREGADO' %}
+                        background: #c8e6c9;
+                        color: #2e7d32;
+                    {% elif pedido.estado == 'ENVIADO' %}
+                        background: #bbdefb;
+                        color: #1565c0;
+                    {% elif pedido.estado == 'PAGADO' %}
+                        background: #fff9c4;
+                        color: #f57f17;
+                    {% elif pedido.estado == 'PENDIENTE' %}
+                        background: #ffcdd2;
+                        color: #c62828;
+                    {% else %}
+                        background: #e0e0e0;
+                        color: #616161;
+                    {% endif %}
+                ">
+                    {{ pedido.estado }}
+                </span>
+            </p>
+        </div>
+        
+        <div style="background: #fff5f5; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #ff5252;">
+            <h4 style="color: #721c24; margin-bottom: 10px;">⚠️ ADVERTENCIAS IMPORTANTES:</h4>
+            <ul style="text-align: left; color: #721c24; padding-left: 20px;">
+                <li>Esta acción eliminará TODOS los detalles asociados a este pedido</li>
+                <li>Se eliminarán todas las ventas relacionadas con este pedido</li>
+                <li>Esta acción NO se puede deshacer</li>
+                <li>El cliente será notificado automáticamente</li>
+            </ul>
+        </div>
+        
+        <p style="margin-top: 20px; font-weight: bold; color: #721c24;">
+            ⚠️ Si solo quieres cancelar el pedido, cambia el estado a "CANCELADO" en lugar de eliminar.
+        </p>
+    </div>
+    
+    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="padding: 12px 40px;">
+                ⚠️ Sí, Eliminar Permanentemente
+            </button>
+        </form>
+        <a href="{% url 'administracion:detalle_pedido' pedido.id %}" class="btn btn-secondary" style="padding: 12px 40px;">No, Volver al Detalle</a>
+        <a href="{% url 'administracion:ver_pedidos' %}" class="btn btn-primary" style="padding: 12px 40px;">Cancelar</a>
+    </div>
+</div>
+{% endblock %}

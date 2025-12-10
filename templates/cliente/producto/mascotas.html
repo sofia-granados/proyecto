@@ -1,0 +1,80 @@
+{% extends 'cliente/base_cliente.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Mascotas Disponibles</h1>
+    
+    {% if tipos %}
+    <div class="mb-4">
+        <h5>Filtrar por Tipo:</h5>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'cliente:vista_mascotas' %}" 
+               class="btn {% if not request.GET.tipo %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Todas
+            </a>
+            {% for tipo in tipos %}
+            <a href="?tipo={{ tipo.id }}" 
+               class="btn {% if request.GET.tipo == tipo.id|stringformat:'i' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {{ tipo.nombre }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        {% if mascotas %}
+            {% for mascota in mascotas %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if mascota.imagen %}
+                    <img src="{{ mascota.imagen.url }}" class="card-img-top" alt="{{ mascota.nombre }}" style="height: 250px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                        {% if mascota.tipo.nombre == 'Perro' %}
+                        <i class="fas fa-dog fa-4x text-muted"></i>
+                        {% elif mascota.tipo.nombre == 'Gato' %}
+                        <i class="fas fa-cat fa-4x text-muted"></i>
+                        {% else %}
+                        <i class="fas fa-paw fa-4x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ mascota.nombre }}</h5>
+                        <p class="card-text">
+                            <strong>Raza:</strong> {{ mascota.raza }}<br>
+                            <strong>Edad:</strong> {{ mascota.edad }} meses<br>
+                            <strong>Tipo:</strong> <span class="badge bg-secondary">{{ mascota.tipo.nombre }}</span>
+                        </p>
+                        <p class="card-text">{{ mascota.descripcion|truncatechars:100 }}</p>
+                        
+                        <div class="mt-auto">
+                            <p class="h4 text-success mb-3">${{ mascota.precio }}</p>
+                            
+                            <a href="{% url 'cliente:detalle_producto' tipo_producto='mascota' producto_id=mascota.id %}" 
+                               class="btn btn-success w-100">
+                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                No hay mascotas disponibles en este momento.
+                {% if request.GET.tipo %}
+                <a href="{% url 'cliente:vista_mascotas' %}" class="alert-link">Ver todas las mascotas</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

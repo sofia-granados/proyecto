@@ -1,0 +1,70 @@
+{% extends 'administracion/base_admin.html' %}
+
+{% block title %}Editar Usuario - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 style="color: #ff65a3; margin-bottom: 30px; text-align: center;">Editar Usuario: {{ usuario.nombre }}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" name="nombre" value="{{ usuario.nombre }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Apellido Paterno:</label>
+                <input type="text" name="apepaterno" value="{{ usuario.apepaterno }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Apellido Materno:</label>
+                <input type="text" name="apematerno" value="{{ usuario.apematerno }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Correo Electrónico:</label>
+                <input type="email" name="correo" value="{{ usuario.correo }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>RFC:</label>
+                <input type="text" name="rfc" value="{{ usuario.rfc }}" required maxlength="13">
+            </div>
+            
+            <div class="form-group">
+                <label>Teléfono:</label>
+                <input type="text" name="telefono" value="{{ usuario.telefono }}" required maxlength="15">
+            </div>
+            
+            <div class="form-group" style="grid-column: span 2;">
+                <label>Domicilio:</label>
+                <textarea name="domicilio" rows="3" required>{{ usuario.domicilio }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Código Postal:</label>
+                <input type="text" name="codigo_postal" value="{{ usuario.codigo_postal }}" required maxlength="5">
+            </div>
+            
+            <div class="form-group">
+                <label>Estado:</label>
+                <input type="text" name="estado" value="{{ usuario.estado }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Ciudad:</label>
+                <input type="text" name="ciudad" value="{{ usuario.ciudad }}" required>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 40px;">Actualizar</button>
+            <a href="{% url 'administracion:ver_usuarios' %}" class="btn btn-secondary" style="padding: 12px 40px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

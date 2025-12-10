@@ -1,0 +1,226 @@
+{% extends 'cliente/base_cliente.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">🔍 Resultados de búsqueda</h1>
+    
+    <!-- Formulario de búsqueda -->
+    <div class="mb-4">
+        <form action="{% url 'cliente:buscar_productos' %}" method="get" class="d-flex">
+            <input type="text" name="q" value="{{ query }}" 
+                   placeholder="Buscar productos..." 
+                   class="form-control me-2" style="border-radius: 20px; padding: 12px;">
+            <button type="submit" class="btn btn-primary" style="border-radius: 20px; padding: 0 25px;">
+                🔍 Buscar
+            </button>
+        </form>
+        
+        {% if query %}
+        <p class="text-muted mt-2">
+            Buscando: <strong>"{{ query }}"</strong> 
+            <span class="ms-3">📊 {{ resultados|length }} resultado{% if resultados|length != 1 %}s{% endif %} encontrado{% if resultados|length != 1 %}s{% endif %}</span>
+        </p>
+        {% endif %}
+    </div>
+    
+    <!-- Resultados -->
+    {% if resultados %}
+    <div class="row">
+        {% for producto in resultados %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                <!-- Imagen del producto -->
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" 
+                     style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                     style="height: 200px;">
+                    <!-- Determinar tipo de producto sin usar filter -->
+                    {% if producto.tiene_descuento or producto.precio_original %}
+                        {% if producto.categoria.nombre|lower == 'alimento' or producto.categoria.nombre|lower == 'snacks' %}
+                        <i class="fas fa-utensils fa-3x text-muted"></i>
+                        {% else %}
+                        <i class="fas fa-paw fa-3x text-muted"></i>
+                        {% endif %}
+                    {% elif producto.estado %}
+                        <!-- Es una mascota -->
+                        <i class="fas fa-dog fa-3x text-muted"></i>
+                    {% else %}
+                        <i class="fas fa-box fa-3x text-muted"></i>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ producto.nombre }}</h5>
+                    
+                    <!-- Tipo de producto -->
+                    <p class="card-text text-muted small mb-2">
+                        {% if producto.tiene_descuento or producto.precio_original %}
+                            {% if producto.categoria.nombre|lower == 'alimento' or producto.categoria.nombre|lower == 'snacks' %}
+                            <span class="badge bg-info">🍖 Alimento</span>
+                            {% else %}
+                            <span class="badge bg-success">🛍️ Accesorio</span>
+                            {% endif %}
+                        {% elif producto.estado %}
+                            <!-- Es una mascota -->
+                            <span class="badge bg-warning">🐶 Mascota</span>
+                        {% endif %}
+                        
+                        {% if producto.categoria %}
+                        <span class="badge bg-secondary ms-1">{{ producto.categoria.nombre }}</span>
+                        {% endif %}
+                        
+                        {% if producto.tipo %}
+                        <span class="badge bg-primary ms-1">{{ producto.tipo.nombre }}</span>
+                        {% endif %}
+                    </p>
+                    
+                    <!-- Descripción (recortada) -->
+                    {% if producto.descripcion %}
+                    <p class="card-text small text-muted mb-3">
+                        {{ producto.descripcion|truncatechars:80 }}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="mt-auto">
+                        <!-- Precio -->
+                        <div class="mb-2">
+                            {% if producto.tiene_descuento and producto.precio_original %}
+                            <div class="d-flex align-items-center">
+                                <span class="h5 text-primary mb-0">${{ producto.precio }}</span>
+                                <span class="text-muted text-decoration-line-through ms-2">${{ producto.precio_original }}</span>
+                                {% if producto.porcentaje_descuento %}
+                                <span class="badge bg-danger ms-2">-{{ producto.porcentaje_descuento }}%</span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <p class="h5 text-primary mb-0">${{ producto.precio }}</p>
+                            {% endif %}
+                            
+                            <!-- Stock solo para productos, no mascotas -->
+                            {% if not producto.estado %}  <!-- No es mascota -->
+                            <small class="text-muted">
+                                {% if producto.stock > 0 %}
+                                ✅ Disponible
+                                {% else %}
+                                ❌ Agotado
+                                {% endif %}
+                            </small>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botón de acción -->
+                        {% if producto.estado %}
+                            <!-- Es mascota -->
+                            <a href="{% url 'cliente:detalle_producto' tipo_producto='mascota' producto_id=producto.id %}" 
+                               class="btn btn-primary w-100">
+                                🐾 Ver Mascota
+                            </a>
+                        {% elif producto.tiene_descuento or producto.precio_original %}
+                            <!-- Es alimento o accesorio -->
+                            {% if producto.categoria.nombre|lower == 'alimento' or producto.categoria.nombre|lower == 'snacks' %}
+                            <a href="{% url 'cliente:detalle_producto' tipo_producto='alimento' producto_id=producto.id %}" 
+                               class="btn btn-primary w-100">
+                                Ver Detalles
+                            </a>
+                            {% else %}
+                            <a href="{% url 'cliente:detalle_producto' tipo_producto='accesorio' producto_id=producto.id %}" 
+                               class="btn btn-primary w-100">
+                                Ver Detalles
+                            </a>
+                            {% endif %}
+                        {% else %}
+                            <!-- Producto genérico -->
+                            <a href="{% url 'cliente:detalle_producto' tipo_producto='producto' producto_id=producto.id %}" 
+                               class="btn btn-primary w-100">
+                                Ver Detalles
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% elif query %}
+    <!-- Sin resultados -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-search fa-4x text-muted"></i>
+        </div>
+        <h3 class="mb-3">No se encontraron resultados</h3>
+        <p class="text-muted mb-4">
+            No encontramos productos que coincidan con "{{ query }}".<br>
+            Intenta con otras palabras o revisa nuestra tienda.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'cliente:index_cliente' %}" class="btn btn-primary">
+                🏠 Volver al inicio
+            </a>
+            <a href="{% url 'cliente:vista_alimentos' %}" class="btn btn-outline-primary">
+                🍖 Ver Alimentos
+            </a>
+            <a href="{% url 'cliente:vista_accesorios' %}" class="btn btn-outline-success">
+                🛍️ Ver Accesorios
+            </a>
+            <a href="{% url 'cliente:vista_mascotas' %}" class="btn btn-outline-warning">
+                🐶 Ver Mascotas
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <!-- Sin búsqueda realizada -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-search fa-4x text-muted"></i>
+        </div>
+        <h3 class="mb-3">¿Qué estás buscando?</h3>
+        <p class="text-muted mb-4">
+            Escribe en el campo de búsqueda para encontrar productos, alimentos, accesorios o mascotas.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'cliente:vista_alimentos' %}" class="btn btn-outline-primary">
+                🍖 Ver Alimentos
+            </a>
+            <a href="{% url 'cliente:vista_accesorios' %}" class="btn btn-outline-success">
+                🛍️ Ver Accesorios
+            </a>
+            <a href="{% url 'cliente:vista_mascotas' %}" class="btn btn-outline-warning">
+                🐶 Ver Mascotas
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Sugerencias de búsqueda -->
+    {% if query and resultados %}
+    <div class="mt-5 pt-4 border-top">
+        <h4 class="mb-3">🔎 También podrías buscar:</h4>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'cliente:buscar_productos' %}?q=perro" class="btn btn-outline-primary btn-sm">
+                🐶 Para perros
+            </a>
+            <a href="{% url 'cliente:buscar_productos' %}?q=gato" class="btn btn-outline-primary btn-sm">
+                🐱 Para gatos
+            </a>
+            <a href="{% url 'cliente:buscar_productos' %}?q=comida" class="btn btn-outline-success btn-sm">
+                🍖 Comida
+            </a>
+            <a href="{% url 'cliente:buscar_productos' %}?q=juego" class="btn btn-outline-warning btn-sm">
+                🎮 Juguetes
+            </a>
+            <a href="{% url 'cliente:buscar_productos' %}?q=collar" class="btn btn-outline-info btn-sm">
+                📿 Collares
+            </a>
+            <a href="{% url 'cliente:buscar_productos' %}?q=cama" class="btn btn-outline-secondary btn-sm">
+                🛌 Camas
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

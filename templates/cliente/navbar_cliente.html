@@ -1,0 +1,169 @@
+<!-- templates/cliente/navbar_cliente.html -->
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+
+<nav class="navbar-container">
+    <div class="navbar-content">
+        <!-- Logo y navegación -->
+        <div class="navbar-logo-section">
+            <!-- Logo -->
+            <div class="navbar-logo">
+                <span class="navbar-title">🐾 Chofys Pet's</span>
+                <small class="navbar-subtitle">Todo para tu mascota</small>
+            </div>
+            
+            <!-- Navegación principal -->
+            <div class="navbar-links">
+                <a href="{% url 'cliente:index_cliente' %}" class="navbar-link">
+                    🏠 Inicio
+                </a>
+                <a href="{% url 'cliente:vista_mascotas' %}" class="navbar-link">
+                    🐶 Mascotas
+                </a>
+                <a href="{% url 'cliente:vista_alimentos' %}" class="navbar-link">
+                    🍖 Alimentos
+                </a>
+                <a href="{% url 'cliente:vista_accesorios' %}" class="navbar-link">
+                    🛍️ Accesorios
+                </a>
+            </div>
+        </div>
+        
+        <!-- Acciones de usuario -->
+        <div class="navbar-actions">
+            <!-- BÚSQUEDA -->
+            <form action="{% url 'cliente:buscar_productos' %}" method="get" class="search-form">
+                <input type="text" name="q" placeholder="Buscar productos..." class="search-input">
+                <button type="submit" class="search-button">
+                    🔍
+                </button>
+            </form>
+            
+            <!-- CARRITO -->
+            <a href="{% url 'cliente:ver_carrito' %}" class="cart-btn">
+                🛒 Carrito
+                {% if carrito_total_items and carrito_total_items > 0 %}
+                <span class="cart-count">{{ carrito_total_items }}</span>
+                {% endif %}
+            </a>
+            
+            <!-- USUARIO NO AUTENTICADO -->
+            {% if not request.user.is_authenticated %}
+            <div style="display: flex; gap: 10px;">
+                <a href="{% url 'cliente:login_cliente' %}" class="auth-btn">
+                    🔑 Iniciar Sesión
+                </a>
+                <a href="{% url 'cliente:registro_cliente' %}" class="auth-btn auth-btn-primary">
+                    📝 Crear Cuenta
+                </a>
+            </div>
+            
+            <!-- USUARIO AUTENTICADO -->
+            {% else %}
+            <div class="user-menu-container">
+                <button class="user-menu-btn" id="userMenuBtn">
+                    👤 Hola, {{ request.user.first_name|default:request.user.username|truncatechars:15 }}
+                    <span style="font-size: 0.8rem;">▼</span>
+                </button>
+                
+                <!-- Menú desplegable -->
+                <div class="user-menu" id="userMenu">
+                    <!-- Información del usuario -->
+                    <div class="user-info">
+                        <div class="user-name">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </div>
+                        <div class="user-email">
+                            {{ request.user.email }}
+                        </div>
+                        {% if request.user.direccion %}
+                        <div class="user-address">
+                            <span>📍</span>
+                            <span>{{ request.user.direccion|truncatechars:30 }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- MIS PEDIDOS -->
+                    <a href="{% url 'cliente:mis_pedidos' %}" class="menu-item menu-item-pedidos">
+                        <span class="menu-icon">📦</span>
+                        <div>
+                            <div class="menu-title">Mis Pedidos</div>
+                            <div class="menu-description">Ver historial</div>
+                        </div>
+                    </a>
+                    
+                    <!-- MI PERFIL -->
+                    <a href="{% url 'cliente:perfil_usuario' %}" class="menu-item menu-item-perfil">
+                        <span class="menu-icon">👤</span>
+                        <div>
+                            <div class="menu-title">Mi Perfil</div>
+                            <div class="menu-description">Editar datos</div>
+                        </div>
+                    </a>
+                    
+                    <!-- PANEL ADMIN (solo para admin/empleado) -->
+                    {% if request.user.rol in 'admin,empleado' %}
+                    <a href="{% url 'administracion:inicio' %}" class="menu-item menu-item-admin">
+                        <span class="menu-icon">👑</span>
+                        <div>
+                            <div class="menu-title">Panel Admin</div>
+                            <div class="menu-description">Administrar tienda</div>
+                        </div>
+                    </a>
+                    {% endif %}
+                    
+                    <!-- CERRAR SESIÓN -->
+                    <a href="{% url 'cliente:logout_cliente' %}" class="menu-item menu-item-logout" id="logoutLink">
+                        <span class="menu-icon">🚪</span>
+                        <div>
+                            <div class="menu-title">Cerrar Sesión</div>
+                            <div class="menu-description">Salir de tu cuenta</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- JavaScript limpio y separado -->
+<script>
+// Versión de emergencia - directamente en el botón
+function setupUserMenu() {
+    console.log('Configurando menú de usuario...');
+    
+    const btn = document.querySelector('.user-menu-btn');
+    const menu = document.querySelector('.user-menu');
+    
+    if (btn && menu) {
+        console.log('Elementos encontrados');
+        
+        btn.onclick = function(e) {
+            console.log('Botón clickeado');
+            e.stopPropagation();
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
+        };
+        
+        document.onclick = function() {
+            menu.style.display = 'none';
+        };
+        
+        menu.onclick = function(e) {
+            e.stopPropagation();
+        };
+    }
+}
+
+// Ejecutar inmediatamente
+try {
+    setupUserMenu();
+} catch (e) {
+    console.error('Error:', e);
+}
+</script>

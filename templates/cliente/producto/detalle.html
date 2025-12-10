@@ -1,0 +1,222 @@
+{% extends 'cliente/base_cliente.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ producto.nombre }} - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <!-- Navegación - CORREGIDA -->
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'cliente:index_cliente' %}" style="color: #667eea; text-decoration: none;">Inicio</a> 
+        > 
+        {% if tipo_producto == 'mascota' %}
+            <!-- Para mascotas: enlace a vista_mascotas -->
+            <a href="{% url 'cliente:vista_mascotas' %}" style="color: #667eea; text-decoration: none;">
+                Mascotas
+            </a>
+        {% elif producto.categoria %}
+            <!-- Para alimentos/accesorios: enlace a su categoría -->
+            <a href="{% url 'cliente:lista_categoria' categoria_id=producto.categoria.id %}" style="color: #667eea; text-decoration: none;">
+                {{ producto.categoria.nombre }}
+            </a>
+        {% else %}
+            <!-- Si no hay categoría, enlace genérico -->
+            <a href="{% url 'cliente:index_cliente' %}" style="color: #667eea; text-decoration: none;">
+                Productos
+            </a>
+        {% endif %}
+        > 
+        <span style="color: #718096;">{{ producto.nombre }}</span>
+    </div>
+    
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px;">
+            <!-- Imagen -->
+            <div>
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" 
+                     style="width: 100%; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                {% else %}
+                <div style="width: 100%; height: 300px; background: #f7fafc; border-radius: 8px; 
+                            display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-{% if tipo_producto == 'alimento' %}utensils{% elif tipo_producto == 'accesorio' %}paw{% else %}dog{% endif %} fa-5x" 
+                       style="color: #cbd5e0;"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Información -->
+            <div>
+                <h1 style="font-size: 28px; margin-bottom: 10px; color: #2d3748;">{{ producto.nombre }}</h1>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    {% if tipo_producto == 'mascota' %}
+                    <!-- Para mascotas: solo tipo -->
+                    <span style="background: #48bb78; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
+                        {{ producto.tipo.nombre }}
+                    </span>
+                    <span style="background: #ed8936; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
+                        {{ producto.raza }}
+                    </span>
+                    {% else %}
+                    <!-- Para alimentos/accesorios: categoría y tipo -->
+                    <span style="background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
+                        {{ producto.categoria.nombre }}
+                    </span>
+                    <span style="background: #48bb78; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
+                        {{ producto.tipo.nombre }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <p style="color: #4a5568; line-height: 1.6; margin-bottom: 25px;">
+                    {{ producto.descripcion|default:"Sin descripción disponible." }}
+                </p>
+                
+                <!-- Precio -->
+                <div style="margin-bottom: 30px;">
+                    {% if producto.tiene_descuento and tipo_producto != 'mascota' %}
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="font-size: 36px; font-weight: bold; color: #2d3748;">
+                            ${{ producto.precio }}
+                        </span>
+                        <span style="text-decoration: line-through; color: #a0aec0; font-size: 24px;">
+                            ${{ producto.precio_original }}
+                        </span>
+                        <span style="background: #f56565; color: white; padding: 4px 12px; border-radius: 4px; font-weight: bold;">
+                            -{{ producto.porcentaje_descuento }}%
+                        </span>
+                    </div>
+                    {% else %}
+                    <span style="font-size: 36px; font-weight: bold; color: #2d3748;">
+                        ${{ producto.precio }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Stock/Estado -->
+                <div style="margin-bottom: 30px;">
+                    {% if tipo_producto == 'mascota' %}
+                        <!-- Estado para mascotas -->
+                        {% if producto.estado == 'disponible' %}
+                        <span style="color: #48bb78; font-weight: bold;">
+                            <i class="fas fa-check-circle"></i> Disponible
+                        </span>
+                        {% elif producto.estado == 'reservado' %}
+                        <span style="color: #ed8936; font-weight: bold;">
+                            <i class="fas fa-clock"></i> Reservado
+                        </span>
+                        {% else %}
+                        <span style="color: #f56565; font-weight: bold;">
+                            <i class="fas fa-times-circle"></i> Vendido
+                        </span>
+                        {% endif %}
+                    {% else %}
+                        <!-- Stock para alimentos/accesorios -->
+                        {% if producto.stock > 0 %}
+                        <span style="color: #48bb78; font-weight: bold;">
+                            <i class="fas fa-check-circle"></i> En stock: {{ producto.stock }} unidades
+                        </span>
+                        {% else %}
+                        <span style="color: #f56565; font-weight: bold;">
+                            <i class="fas fa-times-circle"></i> Agotado
+                        </span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                <!-- Formulario para agregar al carrito -->
+                {% if tipo_producto != 'mascota' and producto.stock > 0 %}
+                <form action="{% url 'cliente:agregar_al_carrito' %}" method="post" style="display: flex; gap: 10px; align-items: center;">
+                    {% csrf_token %}
+                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                    <input type="hidden" name="tipo_producto" value="{{ tipo_producto }}">
+                    
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="font-weight: bold;">Cantidad:</label>
+                        <input type="number" name="cantidad" value="1" min="1" max="{{ producto.stock }}" 
+                               style="width: 80px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                    </div>
+                    
+                    <button type="submit" 
+                            style="background: #667eea; color: white; border: none; padding: 12px 30px; 
+                                   border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px;">
+                        <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                    </button>
+                </form>
+                {% elif tipo_producto == 'mascota' and producto.estado == 'disponible' %}
+                <!-- Para mascotas disponibles -->
+                <form action="{% url 'cliente:agregar_al_carrito' %}" method="post" style="display: flex; gap: 10px; align-items: center;">
+                    {% csrf_token %}
+                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                    <input type="hidden" name="tipo_producto" value="{{ tipo_producto }}">
+                    <input type="hidden" name="cantidad" value="1">
+                    
+                    <button type="submit" 
+                            style="background: #48bb78; color: white; border: none; padding: 12px 30px; 
+                                   border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px;">
+                        <i class="fas fa-paw"></i> Adoptar esta Mascota
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Detalles adicionales -->
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
+            <h3 style="margin-bottom: 15px; color: #2d3748;">Detalles del Producto</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                <div>
+                    {% if tipo_producto == 'mascota' %}
+                    <p><strong>Tipo:</strong> {{ producto.tipo.nombre }}</p>
+                    <p><strong>Raza:</strong> {{ producto.raza }}</p>
+                    <p><strong>Edad:</strong> {{ producto.edad }} meses</p>
+                    {% else %}
+                    <p><strong>Tipo:</strong> {{ producto.tipo.nombre }}</p>
+                    <p><strong>Categoría:</strong> {{ producto.categoria.nombre }}</p>
+                    <p><strong>Stock disponible:</strong> {{ producto.stock }} unidades</p>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if tipo_producto == 'mascota' %}
+                    <p><strong>Estado:</strong> 
+                        <span style="color: {% if producto.estado == 'disponible' %}#48bb78{% elif producto.estado == 'reservado' %}#ed8936{% else %}#f56565{% endif %};">
+                            {{ producto.get_estado_display }}
+                        </span>
+                    </p>
+                    {% else %}
+                    <p><strong>Estado:</strong> 
+                        <span style="color: {% if producto.activo %}#48bb78{% else %}#f56565{% endif %};">
+                            {% if producto.activo %}Disponible{% else %}No disponible{% endif %}
+                        </span>
+                    </p>
+                    {% if producto.tiene_descuento %}
+                    <p><strong>Descuento:</strong> {{ producto.porcentaje_descuento }}%</p>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Volver -->
+    <div style="text-align: center; margin-top: 30px;">
+        {% if tipo_producto == 'mascota' %}
+        <a href="{% url 'cliente:vista_mascotas' %}" 
+           style="color: #667eea; text-decoration: none; font-weight: bold;">
+            <i class="fas fa-arrow-left"></i> Volver a Mascotas
+        </a>
+        {% elif producto.categoria %}
+        <a href="{% url 'cliente:lista_categoria' categoria_id=producto.categoria.id %}" 
+           style="color: #667eea; text-decoration: none; font-weight: bold;">
+            <i class="fas fa-arrow-left"></i> Volver a {{ producto.categoria.nombre }}
+        </a>
+        {% else %}
+        <a href="{% url 'cliente:index_cliente' %}" 
+           style="color: #667eea; text-decoration: none; font-weight: bold;">
+            <i class="fas fa-arrow-left"></i> Volver al Inicio
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

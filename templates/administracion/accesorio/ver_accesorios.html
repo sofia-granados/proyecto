@@ -1,0 +1,50 @@
+{% extends 'administracion/base_admin.html' %}
+
+{% block title %}Accesorios - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="card-header">Accesorios para Mascotas</h2>
+        <!-- CORREGIDO: Agregar namespace -->
+        <a href="{% url 'administracion:agregar_accesorio' %}" class="btn btn-primary">Agregar Nuevo Accesorio</a>
+    </div>
+
+    <div class="table-container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            {% for accesorio in accesorios %}
+            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    {% if accesorio.imagen %}
+                        <img src="{{ accesorio.imagen.url }}" alt="{{ accesorio.nombre }}" 
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                    {% else %}
+                        <div style="width: 100%; height: 200px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <span style="color: #999;">Sin imagen</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <h3 style="color: #ff65a3; margin-bottom: 10px;">{{ accesorio.nombre }}</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <p><strong>Precio:</strong> ${{ accesorio.precio }}</p>
+                    <p><strong>Tipo:</strong> {{ accesorio.id_tipo.nombre }}</p>
+                    <p><strong>Función:</strong> {{ accesorio.funcion|truncatechars:50 }}</p>
+                </div>
+                
+                <div class="action-buttons" style="justify-content: center;">
+                    <!-- CORREGIDO: Agregar namespace y quitar el ':' al inicio -->
+                    <a href="{% url 'administracion:editar_accesorio' accesorio.id_accesorio %}" class="btn btn-secondary">Editar</a>
+                    <a href="{% url 'administracion:eliminar_accesorio' accesorio.id_accesorio %}" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+            {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                <p>No hay accesorios registrados.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

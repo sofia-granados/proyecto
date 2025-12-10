@@ -1,0 +1,26 @@
+{% extends 'administracion/base_admin.html' %}
+
+{% block title %}Eliminar Tipo - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 style="color: #ff5252; margin-bottom: 20px; text-align: center;">Confirmar Eliminación</h2>
+    
+    <div class="alert alert-danger" style="text-align: center; padding: 30px;">
+        <h3 style="margin-bottom: 20px;">¿Está seguro de eliminar este tipo?</h3>
+        <p><strong>{{ tipo.nombre }}</strong></p>
+        <p>{{ tipo.descripcion|truncatechars:150 }}</p>
+        <p style="margin-top: 20px; font-weight: bold; color: #721c24;">
+            Advertencia: Esta acción eliminará todos los productos asociados a este tipo.
+        </p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+            <button type="submit" class="btn btn-danger" style="padding: 12px 40px;">Sí, Eliminar</button>
+            <a href="{% url 'administracion:ver_tipos' %}" class="btn btn-secondary" style="padding: 12px 40px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

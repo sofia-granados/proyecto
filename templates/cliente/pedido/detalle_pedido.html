@@ -1,0 +1,150 @@
+<!-- app_mascotas/templates/cliente/pedido/detalle_pedido.html -->
+{% extends 'cliente/base_cliente.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'cliente:mis_pedidos' %}" class="btn" style="background: #e2e8f0; color: #4a5568;">
+            ← Volver a mis pedidos
+        </a>
+    </div>
+    
+    <div class="form-container">
+        <h2 style="margin-bottom: 20px;">Pedido: {{ pedido.numero_pedido }}</h2>
+        
+        <!-- Información del pedido -->
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <strong>Fecha:</strong><br>
+                    {{ pedido.fecha_pedido|date:"d/m/Y H:i" }}
+                </div>
+                <div>
+                    <strong>Estado:</strong><br>
+                    {% if pedido.estado == 'PENDIENTE' %}
+                    <span class="badge-pendiente">{{ pedido.estado|title }}</span>
+                    {% elif pedido.estado == 'PAGADO' %}
+                    <span class="badge-pagado">{{ pedido.estado|title }}</span>
+                    {% elif pedido.estado == 'ENVIADO' %}
+                    <span class="badge-enviado">{{ pedido.estado|title }}</span>
+                    {% elif pedido.estado == 'ENTREGADO' %}
+                    <span class="badge-entregado">{{ pedido.estado|title }}</span>
+                    {% elif pedido.estado == 'CANCELADO' %}
+                    <span class="badge-cancelado">{{ pedido.estado|title }}</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <strong>Subtotal:</strong><br>
+                    ${{ pedido.subtotal|floatformat:2 }}
+                </div>
+                <div>
+                    <strong>IVA:</strong><br>
+                    ${{ pedido.iva|floatformat:2 }}
+                </div>
+                <div>
+                    <strong>Total:</strong><br>
+                    <span style="font-weight: bold; font-size: 1.2rem;">
+                        ${{ pedido.total|floatformat:2 }}
+                    </span>
+                </div>
+            </div>
+            
+            {% if pedido.direccion_envio %}
+            <div style="margin-top: 15px;">
+                <strong>Dirección de envío:</strong><br>
+                {{ pedido.direccion_envio }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Detalles del pedido -->
+        <h3 style="margin-bottom: 15px;">Productos</h3>
+        {% if pedido.detalles.all %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in pedido.detalles.all %}
+                    <tr>
+                        <td>
+                            {% if detalle.alimento %}
+                                {{ detalle.alimento.nombre }}
+                            {% elif detalle.accesorio %}
+                                {{ detalle.accesorio.nombre }}
+                            {% elif detalle.mascota %}
+                                {{ detalle.mascota.nombre }}
+                            {% endif %}
+                        </td>
+                        <td>{{ detalle.cantidad }}</td>
+                        <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
+                        <td>${{ detalle.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert" style="background: #e2e8f0; padding: 15px; border-radius: 8px;">
+            No hay detalles disponibles para este pedido.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .badge-pendiente, .badge-pagado, .badge-enviado, .badge-entregado, .badge-cancelado {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .badge-pendiente {
+        background: #fed7d7;
+        color: #c53030;
+    }
+    
+    .badge-pagado {
+        background: #bee3f8;
+        color: #2c5282;
+    }
+    
+    .badge-enviado {
+        background: #fefcbf;
+        color: #744210;
+    }
+    
+    .badge-entregado {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+    
+    .badge-cancelado {
+        background: #e2e8f0;
+        color: #4a5568;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

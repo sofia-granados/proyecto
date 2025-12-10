@@ -1,0 +1,107 @@
+{% extends 'cliente/base_cliente.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Accesorios para Mascotas</h1>
+    
+    <div class="row mb-4">
+        {% if tipos %}
+        <div class="col-md-6 mb-3">
+            <h5>Filtrar por Mascota:</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'cliente:vista_accesorios' %}" 
+                   class="btn {% if not request.GET.tipo %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    Todas
+                </a>
+                {% for tipo in tipos %}
+                <a href="?tipo={{ tipo.id }}" 
+                   class="btn {% if request.GET.tipo == tipo.id|stringformat:'i' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ tipo.nombre }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if categorias %}
+        <div class="col-md-6 mb-3">
+            <h5>Filtrar por Categoría:</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'cliente:vista_accesorios' %}" 
+                   class="btn {% if not request.GET.categoria %}btn-success{% else %}btn-outline-success{% endif %}">
+                    Todas
+                </a>
+                {% for categoria in categorias %}
+                <a href="?categoria={{ categoria.id }}" 
+                   class="btn {% if request.GET.categoria == categoria.id|stringformat:'i' %}btn-success{% else %}btn-outline-success{% endif %}">
+                    {{ categoria.nombre }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Lista de accesorios -->
+    <div class="row">
+        {% if accesorios %}
+            {% for accesorio in accesorios %}
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if accesorio.imagen %}
+                    <img src="{{ accesorio.imagen.url }}" class="card-img-top" alt="{{ accesorio.nombre }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        {% if accesorio.tipo.nombre == 'Perro' %}
+                        <i class="fas fa-dog fa-3x text-muted"></i>
+                        {% elif accesorio.tipo.nombre == 'Gato' %}
+                        <i class="fas fa-cat fa-3x text-muted"></i>
+                        {% else %}
+                        <i class="fas fa-paw fa-3x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ accesorio.nombre }}</h5>
+                        <p class="card-text text-muted small">
+                            <span class="badge bg-info">{{ accesorio.categoria.nombre }}</span>
+                            <span class="badge bg-secondary">{{ accesorio.tipo.nombre }}</span>
+                        </p>
+                        
+                        <div class="mt-auto">
+                            {% if accesorio.precio_original and accesorio.precio < accesorio.precio_original %}
+                            <div class="d-flex align-items-center">
+                                <span class="h5 text-primary mb-0">${{ accesorio.precio }}</span>
+                                <span class="text-muted text-decoration-line-through ms-2">${{ accesorio.precio_original }}</span>
+                                <span class="badge bg-danger ms-2">
+                                    -{{ accesorio.precio_original|floatformat:0|add:"-"|add:accesorio.precio|floatformat:0 }}%
+                                </span>
+                            </div>
+                            {% else %}
+                            <p class="h4 text-primary mb-2">${{ accesorio.precio }}</p>
+                            {% endif %}
+                            
+                            <a href="{% url 'cliente:detalle_producto' tipo_producto='accesorio' producto_id=accesorio.id %}" 
+                               class="btn btn-primary w-100">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No hay accesorios disponibles con los filtros seleccionados.
+                <a href="{% url 'cliente:vista_accesorios' %}" class="alert-link">Ver todos los accesorios</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

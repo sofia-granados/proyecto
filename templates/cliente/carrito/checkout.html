@@ -1,0 +1,244 @@
+{% extends 'cliente/base_cliente.html' %}
+{% load custom_filters %}
+
+{% block title %}Checkout - Chofys Pet's{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <h1 style="font-size: 28px; margin-bottom: 25px; color: #2d3748;">💳 Checkout - Finalizar Compra</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div style="background: {% if message.tags == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; 
+                    color: {% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %};
+                    padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <!-- Formulario de envío y pago -->
+        <div>
+            <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 25px;">
+                <h2 style="color: #4a5568; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>🚚</span> Información de Envío
+                </h2>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 600;">
+                            Nombre completo *
+                        </label>
+                        <input type="text" 
+                               name="nombre" 
+                               value="{{ user.first_name }} {{ user.last_name }}" 
+                               required 
+                               style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 600;">
+                            Correo electrónico *
+                        </label>
+                        <input type="email" 
+                               name="email" 
+                               value="{{ user.email }}" 
+                               required 
+                               style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 600;">
+                            Teléfono *
+                        </label>
+                        <input type="tel" 
+                               name="telefono" 
+                               value="{{ telefono_default }}" 
+                               required 
+                               style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 600;">
+                            Dirección de envío *
+                        </label>
+                        <textarea name="direccion" 
+                                  rows="4" 
+                                  required 
+                                  style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px;">{{ direccion_default }}</textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 600;">
+                            Notas adicionales (opcional)
+                        </label>
+                        <textarea name="notas" 
+                                  rows="3" 
+                                  placeholder="Instrucciones especiales para la entrega..." 
+                                  style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px;"></textarea>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 30px;">
+                        <h3 style="color: #4a5568; margin-bottom: 15px;">💳 Método de Pago</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <input type="radio" id="efectivo" name="metodo_pago" value="efectivo" checked style="margin-right: 10px;">
+                            <label for="efectivo" style="color: #4a5568;">
+                                💵 Efectivo al recibir
+                            </label>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <input type="radio" id="tarjeta" name="metodo_pago" value="tarjeta" style="margin-right: 10px;">
+                            <label for="tarjeta" style="color: #4a5568;">
+                                💳 Tarjeta de crédito/débito
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <input type="radio" id="transferencia" name="metodo_pago" value="transferencia" style="margin-right: 10px;">
+                            <label for="transferencia" style="color: #4a5568;">
+                                🏦 Transferencia bancaria
+                            </label>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        
+        <!-- Resumen del pedido -->
+        <div>
+            <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h2 style="color: #4a5568; margin-bottom: 20px;">📦 Resumen del Pedido</h2>
+                
+                <!-- Productos -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #4a5568; font-size: 1.1rem; margin-bottom: 15px;">📦 Productos en tu carrito</h3>
+                    
+                    {% for item in items_carrito %}
+                    {% with producto=item.producto %}
+                    <div style="display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #e2e8f0;">
+                        <div>
+                            {% if producto %}
+                            <strong style="color: #2d3748;">{{ producto.nombre }}</strong><br>
+                            <span style="color: #718096; font-size: 0.9rem;">
+                                {{ item.cantidad }} x ${{ producto.precio }}
+                            </span>
+                            {% else %}
+                            <strong style="color: #f56565;">Producto no disponible</strong>
+                            {% endif %}
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: #2d3748; font-weight: bold;">
+                                ${{ item.subtotal }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+                
+                <!-- Resumen de costos -->
+                <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #4a5568;">Subtotal:</span>
+                        <span style="color: #2d3748;">${{ total_carrito }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #4a5568;">IVA (16%):</span>
+                        <span style="color: #2d3748;">${{ iva }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-top: 15px; border-top: 2px solid #e2e8f0; font-size: 18px;">
+                        <span style="color: #4a5568; font-weight: bold;">Total:</span>
+                        <span style="color: #667eea; font-weight: bold;">${{ total_con_iva }}</span>
+                    </div>
+                </div>
+                
+                <!-- Términos y condiciones -->
+                <div style="background: #fff3cd; border-radius: 8px; padding: 15px; margin-bottom: 25px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;">
+                        <div style="font-size: 1.2rem;">📝</div>
+                        <div>
+                            <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+                                Al completar esta compra, aceptas nuestros 
+                                <a href="#" style="color: #d97706;">Términos y Condiciones</a> y 
+                                <a href="#" style="color: #d97706;">Política de Privacidad</a>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botón de confirmación -->
+                <button type="submit" 
+                        style="width: 100%; background: #48bb78; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s;">
+                    ✅ Confirmar y Realizar Pedido
+                </button>
+                </form>
+                
+                <!-- Volver al carrito -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="{% url 'cliente:ver_carrito' %}" 
+                       style="color: #667eea; text-decoration: none; font-size: 0.9rem;">
+                        ← Volver al carrito
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Información adicional -->
+            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4x 20px rgba(0,0,0,0.1); margin-top: 20px;">
+                <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 15px;">
+                    <div style="font-size: 1.2rem;">🚚</div>
+                    <div>
+                        <strong style="color: #4a5568;">Envío Gratis</strong>
+                        <p style="color: #718096; font-size: 0.9rem; margin: 5px 0 0 0;">
+                            Envío estándar gratuito en todos los pedidos.
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                    <div style="font-size: 1.2rem;">🔄</div>
+                    <div>
+                        <strong style="color: #4a5568;">Devoluciones Fáciles</strong>
+                        <p style="color: #718096; font-size: 0.9rem; margin: 5px 0 0 0;">
+                            30 días para devoluciones o cambios.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación básica del formulario
+    const checkoutForm = document.querySelector('form');
+    
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function(e) {
+            const direccion = this.querySelector('textarea[name="direccion"]').value;
+            const telefono = this.querySelector('input[name="telefono"]').value;
+            
+            if (!direccion.trim() || !telefono.trim()) {
+                e.preventDefault();
+                alert('Por favor, completa todos los campos obligatorios (*)');
+                return false;
+            }
+            
+            // Confirmación final
+            if (!confirm('¿Estás seguro de confirmar tu pedido?\n\nUna vez confirmado, tu carrito se vaciará y el pedido será procesado.')) {
+                e.preventDefault();
+                return false;
+            }
+            
+            return true;
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}
